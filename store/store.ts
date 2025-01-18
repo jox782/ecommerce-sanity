@@ -1,7 +1,6 @@
 import { Product } from "@/sanity.types";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { BasketIcon } from "@sanity/icons";
 
 export interface BasketItem {
   product: Product;
@@ -18,7 +17,7 @@ interface BasketState {
   getGroupedItems: () => BasketItem[];
 }
 
-const useBasketStore = create<BasketState>()(
+export const useBasketStore = create<BasketState>()(
   persist(
     (set, get) => ({
       items: [],
