@@ -279,23 +279,90 @@ export type SanityImageMetadata = {
 
 export type AllSanitySchemaTypes = SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityFileAsset | Geopoint | Sale | Order | Product | Category | Slug | BlockContent | SanityImageCrop | SanityImageHotspot | SanityImageAsset | SanityAssetSourceData | SanityImageMetadata;
 export declare const internalGroqTypeReferenceTo: unique symbol;
-// Source: ./sanity/lib/sales/getActiveSaleByCouponCode.ts
-// Variable: ACTIVE_SALE_BY_COUPON_QUERY
-// Query: *[			_type == "sale"			&& isActive == true			&& couponCode == $couponCode		] | order(validForm desc)[0]
-export type ACTIVE_SALE_BY_COUPON_QUERYResult = {
+// Source: ./sanity/lib/orders/getMyOrders.tsx
+// Variable: MY_ORDERS_QUERY
+// Query: *[			_type == "order" && clerkUserId == $userId		] | order(orderDate desc) {			...,			products[]{				...,				product-> 			}		}
+export type MY_ORDERS_QUERYResult = Array<{
   _id: string;
-  _type: "sale";
+  _type: "order";
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
-  title?: string;
-  description?: string;
-  discountAmount?: number;
-  couponCode?: string;
-  validForm?: string;
-  validUntil?: string;
-  isActive?: boolean;
-} | null;
+  orderNumber?: string;
+  stripeCheckoutSessionId?: string;
+  stripeCustomerId?: string;
+  customerName?: string;
+  email?: string;
+  stripePaymentIntentId?: string;
+  products: Array<{
+    product: {
+      _id: string;
+      _type: "product";
+      _createdAt: string;
+      _updatedAt: string;
+      _rev: string;
+      name?: string;
+      slug?: Slug;
+      image?: {
+        asset?: {
+          _ref: string;
+          _type: "reference";
+          _weak?: boolean;
+          [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+        };
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: "image";
+      };
+      description?: Array<{
+        children?: Array<{
+          marks?: Array<string>;
+          text?: string;
+          _type: "span";
+          _key: string;
+        }>;
+        style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "normal";
+        listItem?: "bullet";
+        markDefs?: Array<{
+          href?: string;
+          _type: "link";
+          _key: string;
+        }>;
+        level?: number;
+        _type: "block";
+        _key: string;
+      } | {
+        asset?: {
+          _ref: string;
+          _type: "reference";
+          _weak?: boolean;
+          [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+        };
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        alt?: string;
+        _type: "image";
+        _key: string;
+      }>;
+      price?: number;
+      categories?: Array<{
+        _ref: string;
+        _type: "reference";
+        _weak?: boolean;
+        _key: string;
+        [internalGroqTypeReferenceTo]?: "category";
+      }>;
+      stock?: number;
+    } | null;
+    quantity?: number;
+    _key: string;
+  }> | null;
+  totalPrice?: number;
+  currency?: string;
+  amountDiscount?: number;
+  status?: "cancelled" | "delivered" | "paid" | "pending" | "shipped";
+  orderDate?: string;
+}>;
 
 // Source: ./sanity/lib/products/getAllCategories.ts
 // Variable: ALL_CATEGORIES_QUERY
@@ -563,15 +630,34 @@ export type PRODUCT_SEARCH_QUERYResult = Array<{
   stock?: number;
 }>;
 
+// Source: ./sanity/lib/sales/getActiveSaleByCouponCode.ts
+// Variable: ACTIVE_SALE_BY_COUPON_QUERY
+// Query: *[			_type == "sale"			&& isActive == true			&& couponCode == $couponCode		] | order(validForm desc)[0]
+export type ACTIVE_SALE_BY_COUPON_QUERYResult = {
+  _id: string;
+  _type: "sale";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  description?: string;
+  discountAmount?: number;
+  couponCode?: string;
+  validForm?: string;
+  validUntil?: string;
+  isActive?: boolean;
+} | null;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    "\n\t\t*[\n\t\t\t_type == \"sale\"\n\t\t\t&& isActive == true\n\t\t\t&& couponCode == $couponCode\n\t\t] | order(validForm desc)[0]": ACTIVE_SALE_BY_COUPON_QUERYResult;
+    "\n\t\t*[\n\t\t\t_type == \"order\" && clerkUserId == $userId\n\t\t] | order(orderDate desc) {\n\t\t\t...,\n\t\t\tproducts[]{\n\t\t\t\t...,\n\t\t\t\tproduct-> \n\t\t\t}\n\t\t}": MY_ORDERS_QUERYResult;
     "\n\t\t*[\n\t\t\t_type == \"category\"\n\t\t] | order(name asc)": ALL_CATEGORIES_QUERYResult;
     "\n\t\t*[\n\t\t\t_type == \"product\"\n\t\t] | order(name asc)": ALL_PRODUCTS_QUERYResult;
     "\n\t\t*[\n\t\t\t_type == \"product\"\n\t\t\t&& slug.current == $slug\n\t\t] | order(name asc)[0]\n\t\t": PRODUCT_BY_ID_QUERYResult;
     "\n\t\t\t*[\n  _type == \"product\"\n  && references(*[_type == \"category\" && slug.current == $categorySlug]._id)\n] | order(name asc)\n\t\t\t": PRODUCTS_BY_CATEGORY_QUERYResult;
     "\n\t\t*[\n\t\t\t_type == \"product\"\n\t\t\t&& name match $searchParam\n\t\t] | order(name asc)\n\t\t": PRODUCT_SEARCH_QUERYResult;
+    "\n\t\t*[\n\t\t\t_type == \"sale\"\n\t\t\t&& isActive == true\n\t\t\t&& couponCode == $couponCode\n\t\t] | order(validForm desc)[0]": ACTIVE_SALE_BY_COUPON_QUERYResult;
   }
 }
