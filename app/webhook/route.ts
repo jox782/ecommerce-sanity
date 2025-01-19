@@ -101,4 +101,6 @@ async function createOrderInSanity(session: Stripe.Checkout.Session) {
     status: "paid",
     orderDate: new Date().toISOString(),
   });
+
+  return order;
 }

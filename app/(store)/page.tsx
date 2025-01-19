@@ -3,8 +3,8 @@ import { getAllCategories } from "@/sanity/lib/products/getAllCategories";
 import ProductsView from "@/components/ProductsView";
 import BlackFridayBanner from "@/components/BlackFridayBanner";
 
-// export const dynamic = "force-static";
-// export const revalidate = 60;
+export const dynamic = "force-static";
+export const revalidate = 60; // 60 sec is very aggressive we can do 1 hour
 
 export default async function Home() {
   const products = await getAllProducts();
